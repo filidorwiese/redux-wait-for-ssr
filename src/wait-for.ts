@@ -8,7 +8,7 @@ export type ActionType = string
 export type ActionTypes = ActionType[]
 
 export interface WaitForPromise {
-  promise: Deferred
+  deferred: Deferred
   actions: ActionTypes
 }
 
@@ -47,7 +47,7 @@ export default () => {
 
       // No more actions? Resolve
       if (!promisesList[ii].actions.length) {
-        promisesList[ii].promise.resolve()
+        promisesList[ii].deferred.resolve()
         promisesList.splice(ii, 1)
       }
     }
@@ -57,13 +57,13 @@ export default () => {
     // Create waitFor promise
     if (action.type === WAIT_FOR_ACTIONS) {
       const waitingFor = {
-        promise: new Deferred(),
+        deferred: new Deferred(),
         actions: Array.isArray(action.actions) ? action.actions : [action.actions]
       }
 
       promisesList.push(waitingFor)
 
-      return waitingFor.promise
+      return waitingFor.deferred.promise
     }
   }
 }
