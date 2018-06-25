@@ -1,15 +1,27 @@
 import typescript from 'rollup-plugin-typescript2'
-import commonjs from 'rollup-plugin-commonjs'
 
-export default {
-  input: 'src/wait-for.ts',
-  output: {
-    file: 'dist/wait-for.js',
-    name: 'WaitFor',
-    format: 'es'
+export default [
+  {
+    input: 'src/wait-for.ts',
+    output: {
+      file: 'dist/wait-for.umd.js',
+      name: 'WaitFor',
+      format: 'umd',
+      exports: 'named'
+    },
+    plugins: [
+      typescript()
+    ]
   },
-  plugins: [
-    typescript(),
-    commonjs()
-  ]
-}
+  {
+    input: 'src/wait-for.ts',
+    output: {
+      file: 'dist/wait-for.esm.js',
+      name: 'WaitFor',
+      format: 'esm'
+    },
+    plugins: [
+      typescript()
+    ]
+  }
+]
