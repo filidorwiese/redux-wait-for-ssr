@@ -1,9 +1,9 @@
 # redux-wait-for-ssr
 Redux middleware returning a promise that resolves when specified actions have occurred.
 
-When using Redux on the server-side, you'll very likely want to prefetch some data to prepoluate the state when rendering the initial html markup of the page.
+When using Redux on the server-side, you'll very likely want to prefetch some data to prepopulate the state when rendering the initial html markup of the page. A typical pattern for this is to dispatch the needed api calls from a static `fetchData` method on the page component, which is called on the server-side, and again in `componentDidMount` for soft route changes. 
 
-A typical pattern for this is to dispatch the needed api calls from a static `fetchData` method on the page component, which is called on the server-side, and again in `componentDidMount` for soft route changes. Roughly, this pattern looks like: 
+Roughly, this pattern looks like: 
 
 ```js
 class PageComponent extends React.Component {
@@ -13,13 +13,13 @@ class PageComponent extends React.Component {
   
   componentDidMount () {
     if (!this.props.contentLoaded) {
-      dispatch(actions.FETCH_CONTENT)
+      this.props.dispatch(actions.FETCH_CONTENT)
     }
   }
 }
 ```
 
-However that doesn't yet solve waiting for the api call to actually complete. This library helps with that by offering an action that you can async/await in the `fetchData` method (or `getInitialProps` if you're a Next.js user).
+However that doesn't yet solve waiting for the api call to actually complete. This library helps with that by offering an action that you can async/await in the `fetchData` method so that the server-side will know when the asynchronous action has completed.
 
 ### Example usage:
 
@@ -36,14 +36,16 @@ class PageComponent extends React.Component {
   
   componentDidMount () {
     if (!this.props.contentLoaded) {
-      dispatch(actions.FETCH_CONTENT)
+      this.props.dispatch(actions.FETCH_CONTENT)
     }
   }
 }
 ```
+Some remarks:
 
-It doesn't really matter if you're using thunk, sagas or epics, as long as you dispatch a separate action after the side-effect has completed, you can "wait for it".
-Also notice the parameter given to `waitFor()` is an array of strings, you can specify multiple actions which all have to occur before the promise is resolved!
+* It doesn't really matter which other middleware you're using, thunk, sagas or epics, as long as you dispatch a new action after the side-effect has completed, you can "wait for it".
+* Notice the parameter given to `waitFor()` is an array of strings, you can specify multiple actions which all have to occur before the promise is resolved, conceptually similar to `Promise.all()`.
+* If you're a Next.js user, you should use the static `getInitialProps` method instead of `fetchData`.
 
 ### Installation:
 1. Download
