@@ -1,21 +1,23 @@
-import { Store, Dispatch, Action, AnyAction } from 'redux'
+import { AnyAction, Dispatch, Store } from 'redux'
 
 export const WAIT_FOR_ACTIONS = 'WAIT_FOR_ACTIONS'
 export type WAIT_FOR_ACTIONS = typeof WAIT_FOR_ACTIONS
 
-export type Actions = Action | Action[]
+export type ActionType = string
+
+export type ActionTypes = ActionType[]
 
 export interface WaitForPromise {
-  promise: Deferred;
-  actions: Actions[];
+  promise: Deferred
+  actions: ActionTypes
 }
 
-export interface waitFor {
+export interface WaitFor {
   type: WAIT_FOR_ACTIONS,
-  actions: Actions
+  actions: ActionType | ActionTypes
 }
 
-export function waitFor(actions: Actions): waitFor {
+export function waitFor(actions: ActionType | ActionTypes): WaitFor {
   return {
     type: WAIT_FOR_ACTIONS,
     actions
@@ -23,9 +25,9 @@ export function waitFor(actions: Actions): waitFor {
 }
 
 export class Deferred {
-  promise: Promise<void>
-  reject: () => void
-  resolve: () => void
+  public promise: Promise<void>
+  public reject: () => void
+  public resolve: () => void
 
   constructor() {
     this.promise = new Promise((resolve, reject) => {
@@ -41,7 +43,7 @@ export default () => {
   return (store: Store) => (next: Dispatch<AnyAction>) => (action: AnyAction) => {
     // Loop promises to see if current action fullfills it
     for (let ii = 0; ii < promisesList.length; ii++) {
-      promisesList[ii].actions = promisesList[ii].actions.filter(a => a !== action.type)
+      promisesList[ii].actions = promisesList[ii].actions.filter((a) => a !== action.type)
 
       // No more actions? Resolve
       if (!promisesList[ii].actions.length) {
