@@ -1,0 +1,30 @@
+{
+  "name": "redux-wait-for-ssr",
+  "version": "0.0.1",
+  "description": "Redux middleware returning a promise that resolves when specified actions have occurred",
+  "main": "dist/wait-for.js",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build",
+    "postversion": "git push --follow-tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/filidorwiese/redux-wait-for-ssr.git"
+  },
+  "keywords": [
+    "redux",
+    "middleware",
+    "ssr",
+    "actions",
+    "promise"
+  ],
+  "author": "Filidor Wiese",
+  "license": "ISC",
+  "devDependencies": {
+    "rollup-plugin-commonjs": "9.1.3",
+    "rollup-plugin-typescript2": "0.15.0",
+    "typescript": "2.9.2"
+  }
+}
