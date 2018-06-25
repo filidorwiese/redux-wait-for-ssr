@@ -31,7 +31,7 @@ class PageComponent extends React.Component {
 
     dispatch(actions.FETCH_CONTENT)
 
-    await dispatch(waitFor([constants.FETCH_CONTENT_RESOLVED]))
+    await dispatch(waitFor([actions.FETCH_CONTENT_RESOLVED]))
   }
   
   componentDidMount () {
