@@ -1,7 +1,7 @@
 # redux-wait-for-ssr
-Redux middleware returning a promise that resolves when specified actions have occurred.
+Redux middleware which provides an action that returns a promise that resolves when specified actions have occurred.
 
-When using Redux on the server-side (for SEO and performance purposes), you'll very likely want to prefetch some data to prepopulate the state when rendering the initial html markup of the requested page. A typical pattern for this is to dispatch the needed api calls from a static `fetchData` method on the page component, which is first called on the server-side, and possibly again in `componentDidMount` for soft route changes. 
+When using Redux on the server-side (for SEO and performance purposes), you'll very likely want to prefetch some data to prepopulate the state when rendering the initial html markup of the requested page. A typical pattern for this is to dispatch the needed api calls from a static `fetchData` method on the page component, which is first called on the server-side, and possibly again in `componentDidMount` for soft route changes.
 
 Roughly, this pattern looks like: 
 
@@ -19,7 +19,7 @@ class PageComponent extends React.Component {
 }
 ```
 
-However that doesn't yet solve waiting for the api call to actually complete. This library helps with that by offering a Redux action that you can async/await in the `fetchData` method so that the server-side will wait for the asynchronous action to complete, before entering the render() method.
+However that doesn't yet solve waiting for the api call to actually complete. This library helps with that by offering a Redux action that you can **async/await** in the `fetchData` method so that the server-side will wait for the asynchronous action to complete, before entering the render() method.
 
 ### Example usage:
 
