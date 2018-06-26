@@ -20,7 +20,7 @@ export interface WaitFor {
 export function waitFor(actions: ActionType | ActionTypes): WaitFor {
   return {
     type: WAIT_FOR_ACTIONS,
-    actions
+    actions: Array.isArray(actions) ? actions : [actions]
   }
 }
 
@@ -40,7 +40,7 @@ export class Deferred {
 export default () => {
   const promisesList: WaitForPromise[] = []
 
-  return (store: Store) => (next: Dispatch<AnyAction>) => (action: AnyAction) => {
+  const middleware = (store: Store) => (next: Dispatch<AnyAction>) => (action: AnyAction) => {
     // Loop promises to see if current action fullfills it
     for (let ii = 0; ii < promisesList.length; ii++) {
       promisesList[ii].actions = promisesList[ii].actions.filter((a) => a !== action.type)
@@ -58,7 +58,7 @@ export default () => {
     if (action.type === WAIT_FOR_ACTIONS) {
       const waitingFor = {
         deferred: new Deferred(),
-        actions: Array.isArray(action.actions) ? action.actions : [action.actions]
+        actions: action.actions
       }
 
       promisesList.push(waitingFor)
@@ -66,4 +66,6 @@ export default () => {
       return waitingFor.deferred.promise
     }
   }
+
+  return { middleware, promisesList }
 }

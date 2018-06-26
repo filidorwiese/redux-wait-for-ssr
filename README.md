@@ -61,7 +61,7 @@ import createWaitForMiddleware from 'redux-wait-for-ssr'
 function makeStore(initialState) {
   let enhancer = compose(
     // ...other middleware
-    applyMiddleware(createWaitForMiddleware()),
+    applyMiddleware(createWaitForMiddleware().middleware),
     // ...even more middleware
   )
   return createStore(rootReducer, initialState, enhancer)

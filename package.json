@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rollup -c",
     "test": "jest",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "jest && npm run build",
     "postversion": "git push --follow-tags",
     "test:watch": "jest --watch"
   },
@@ -29,6 +29,7 @@
     "@types/jest": "23.1.2",
     "@types/redux": "3.6.0",
     "jest": "23.2.0",
+    "redux-mock-store": "1.5.3",
     "rollup-plugin-typescript2": "0.15.0",
     "ts-jest": "22.4.6",
     "typescript": "2.9.2"
