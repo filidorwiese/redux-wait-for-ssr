@@ -1,7 +1,10 @@
 # redux-wait-for-ssr
-Redux middleware which provides an action that returns a promise that resolves when specified actions have occurred.
+Redux middleware which provides an action that returns a promise that either:
+* resolves when specified actions have occurred
+* rejects when a given timeout has passed (default: 10s)
 
-When using Redux on the server-side (for SEO and performance purposes), you'll very likely want to prefetch some data to prepopulate the state when rendering the initial html markup of the requested page. A typical pattern for this is to dispatch the needed api calls from a static `fetchData` method on the page component, which is first called on the server-side, and possibly again in `componentDidMount` for soft route changes.
+### Use case:
+When using Redux on the server-side (for SEO and performance purposes), you'll very likely want to prefetch some data to prepopulate the state when rendering the initial html markup of the requested page. A typical pattern for this is to dispatch the needed api calls from a static `fetchData` (or `getInitialProps`) method on the page component, which is first called on the server-side, and possibly again in `componentDidMount` for soft route changes.
 
 Roughly, this pattern looks like: 
 
