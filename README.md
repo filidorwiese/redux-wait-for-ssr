@@ -31,7 +31,7 @@ class PageComponent extends React.Component {
 
     dispatch(actions.FETCH_CONTENT)
 
-    await dispatch(waitFor([actions.FETCH_CONTENT_RESOLVED]))
+    await dispatch(waitFor([actions.FETCH_CONTENT_RESOLVED])) // <- multiple actions allowed!
   }
   
   componentDidMount () {
@@ -43,8 +43,9 @@ class PageComponent extends React.Component {
 ```
 Some remarks:
 
-* It doesn't really matter which other middleware you're using, thunk, sagas or epics, as long as you dispatch a new action after the side-effect has completed, you can "wait for it".
+* It doesn't really matter which other middleware you're using, thunks, sagas or epics, as long as you dispatch a new action after the side-effect has completed, you can "wait for it".
 * Notice the parameter given to `waitFor()` is an array of strings, you can specify multiple actions which all have to occur before the promise is resolved, conceptually similar to `Promise.all()`.
+* In order to prevent hanging promises on the server-side, the promise is auto-rejected after a set timeout of 10 seconds. You can change this with `waitFor([actions], 1000)`. And using a **try/catch** block you could handle the rejection gracefully.
 * If you're a Next.js user, see usage below!
 
 ### Installation:
@@ -82,7 +83,7 @@ class IndexPage extends React.PureComponent {
     const isContentLoaded = selectors.isContentLoaded(currentState)
     if (!isContentLoaded) {
       reduxStore.dispatch(actions.FETCH_CONTENT)
-      await reduxStore.dispatch(waitFor(actions.FETCH_CONTENT_RESOLVED))
+      await reduxStore.dispatch(waitFor([actions.FETCH_CONTENT_RESOLVED]))
     }
 
     return {} // Still useable to return whatever you want as pageProps

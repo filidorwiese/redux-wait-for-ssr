@@ -10,7 +10,8 @@
     "quotemark": [ true, "single" ],
     "trailing-comma": [true, {"multiline": "never", "singleline": "never"}],
     "object-literal-sort-keys": false,
-    "interface-name" : [true, "never-prefix"]
+    "interface-name" : [true, "never-prefix"],
+    "no-console": [false, "log", "warn"]
   },
   "rulesDirectory": []
 }
