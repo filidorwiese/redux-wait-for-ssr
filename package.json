@@ -1,6 +1,6 @@
 {
   "name": "redux-wait-for-ssr",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Redux middleware that waits for specified actions to have occurred",
   "main": "dist/wait-for.umd.js",
   "module": "dist/wait-for.esm.js",
