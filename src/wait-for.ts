@@ -10,7 +10,7 @@ export type ActionTypes = ActionType[]
 export interface WaitForPromise {
   deferred: Deferred
   actions: ActionTypes
-  errorTimeout: number
+  errorTimeout: any
 }
 
 export interface WaitFor {
