@@ -34,7 +34,8 @@ describe('Middleware', () => {
     const mockStore = configureStore(middlewares)
     const store = mockStore({})
 
-    const promise = store.dispatch(waitFor(['action1', 'action2']))
+    // Needs to be cast as any, since the middleware would usually intervene
+    const promise = store.dispatch(waitFor(['action1', 'action2'])) as any
     expect(waitForMiddleware.promisesList.length).toBe(1)
 
     store.dispatch({

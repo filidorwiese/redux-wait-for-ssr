@@ -43,7 +43,7 @@ export class Deferred {
 export default () => {
   const promisesList: WaitForPromise[] = []
 
-  const middleware = (store: Store) => (next: Dispatch<AnyAction>) => (action: AnyAction) => {
+  const middleware = (_: Store) => (next: Dispatch<AnyAction>) => (action: AnyAction): Promise<void> | undefined => {
     // Loop promises to see if current action fullfills it
     for (let ii = 0; ii < promisesList.length; ii++) {
       promisesList[ii].actions = promisesList[ii].actions.filter((a) => a !== action.type)
