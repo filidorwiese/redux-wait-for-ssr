@@ -2,6 +2,7 @@
 Redux middleware which provides an action that returns a promise that either:
 * resolves when specified actions have occurred
 * rejects when a given timeout has passed (default: 10s)
+* optionally rejects when a given error action has occurred
 
 ### Use case:
 When using Redux on the server-side (for SEO and performance purposes), you'll very likely want to prefetch some data to prepopulate the state when rendering the initial html markup of the requested page. A typical pattern for this is to dispatch the needed api calls from a static `fetchData` (or `getInitialProps`) method on the page component, which is first called on the server-side, and possibly again in `componentDidMount` for soft route changes.
@@ -24,6 +25,19 @@ class PageComponent extends React.Component {
 
 However that doesn't yet solve waiting for the api call to actually complete. This library helps with that by offering a Redux action that you can **async/await** in the `fetchData` method so that the server-side will wait for the asynchronous action to complete, before entering the render() method.
 
+### API signature:
+
+`waitFor(actions, timeout, errorAction)`
+
+
+| Parameter        | Type             | Optional         | Meaning            |
+| ---------------- | ---------------- | ---------------- | ---------------- |
+| actions          | array of strings | no               | to specify Redux action(s) which have to occur before the promise is resolved, conceptually similar to `Promise.all()`. |
+| timeout          | number           | yes              | auto-rejects after timeout, defaults to `10000` milliseconds |
+| errorAction      | string           | yes              | a Redux action to immediately reject on |
+
+Returns a promise
+
 ### Example usage:
 
 ```js
@@ -44,12 +58,42 @@ class PageComponent extends React.Component {
   }
 }
 ```
-Some remarks:
+Note:
 
 * It doesn't really matter which other middleware you're using, thunks, sagas or epics, as long as you dispatch a new action after the side-effect has completed, you can "wait for it".
-* Notice the parameter given to `waitFor()` is an array of strings, you can specify multiple actions which all have to occur before the promise is resolved, conceptually similar to `Promise.all()`.
-* In order to prevent hanging promises on the server-side, the promise is auto-rejected after a set timeout of 10 seconds. You can change this with `waitFor([actions], 1000)`. And using a **try/catch** block you could handle the rejection gracefully.
 * If you're a Next.js user, see usage below!
+
+### Error Handling:
+
+In order to prevent hanging promises on the server-side, the promise is auto-rejected after a set timeout of 10 seconds.
+You can change this with the `timeout` parameter: `waitFor([actions], 1000)`.
+
+With the `errorActoin` parameter you can specify an error action that would immediately reject the promise if it occurs.
+
+Using a **try/catch** block you could handle these rejections gracefully:
+
+```js
+import { waitFor } from 'redux-wait-for-ssr'
+
+class PageComponent extends React.Component {
+  static async fetchData ({ dispatch }) {
+
+    dispatch(actions.FETCH_CONTENT)
+
+    try {
+      await dispatch(waitFor([actions.FETCH_CONTENT_RESOLVED], 1000, actions.FETCH_CONTENT_REJECTED)) // <- multiple actions allowed!
+    } catch (e) {
+      // handle error gracefully, for example return a 404 header
+    }
+  }
+  
+  componentDidMount () {
+    if (!this.props.contentLoaded) {
+      this.props.dispatch(actions.FETCH_CONTENT)
+    }
+  }
+}
+```
 
 ### Installation:
 1. Download

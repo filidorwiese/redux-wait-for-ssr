@@ -4,6 +4,8 @@ import createWaitForMiddleware, {waitFor} from '../wait-for'
 jest.setTimeout(1000)
 jest.useFakeTimers()
 
+console.warn = jest.fn()
+
 describe('Action', () => {
   it('should provide Redux waitFor action', () => {
     expect(waitFor(['action1', 'action2'])).toEqual({
@@ -51,8 +53,33 @@ describe('Middleware', () => {
     })
   })
 
-  it('should reject promise after timeout has passed', () => {
+  it('should reject promise if errorAction has occurred', (done) => {
     console.warn = jest.fn()
+    const waitForMiddleware = createWaitForMiddleware()
+    const middlewares = [waitForMiddleware.middleware]
+    const mockStore = configureStore(middlewares)
+    const store = mockStore({})
+
+    // Needs to be cast as any, since the middleware would usually intervene
+    const promise = store.dispatch(waitFor(['action1', 'action2'], undefined, 'rejected-action')) as any
+
+    store.dispatch({
+      type: 'action1'
+    })
+    store.dispatch({
+      type: 'rejected-action'
+    })
+
+    promise.catch(() => {
+      const reason = 'Redux-wait-for-ssr: rejected because rejected-action occurred'
+      expect(promise).rejects.toMatch(reason)
+      expect(console.warn).toHaveBeenCalledWith(reason)
+      expect(waitForMiddleware.promisesList).toEqual([])
+      done()
+    })
+  })
+
+  it('should reject promise after timeout has passed', () => {
     const waitForMiddleware = createWaitForMiddleware()
     const middlewares = [waitForMiddleware.middleware]
     const mockStore = configureStore(middlewares)

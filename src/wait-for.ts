@@ -10,20 +10,27 @@ export type ActionTypes = ActionType[]
 export interface WaitForPromise {
   deferred: Deferred
   actions: ActionTypes
-  errorTimeout: any
+  timeout: any,
+  errorAction: ActionType
 }
 
 export interface WaitFor {
   type: WAIT_FOR_ACTIONS,
   actions: ActionType | ActionTypes,
-  timeout: number
+  timeout: number,
+  errorAction?: ActionType
 }
 
-export function waitFor(actions: ActionType | ActionTypes, timeout: number = 10000): WaitFor {
+export function waitFor(
+  actions: ActionType | ActionTypes,
+  timeout: number = 10000,
+  errorAction?: ActionType
+): WaitFor {
   return {
     type: WAIT_FOR_ACTIONS,
     actions: Array.isArray(actions) ? actions : [actions],
-    timeout
+    timeout,
+    errorAction
   }
 }
 
@@ -34,7 +41,10 @@ export class Deferred {
 
   constructor() {
     this.promise = new Promise((resolve, reject) => {
-      this.reject = reject
+      this.reject = (reason: string) => {
+        if (typeof console !== 'undefined') { console.warn(reason) }
+        reject(reason)
+      }
       this.resolve = resolve
     })
   }
@@ -43,17 +53,28 @@ export class Deferred {
 export default () => {
   const promisesList: WaitForPromise[] = []
 
+  const removePromiseFromList = (index: number) => {
+    clearTimeout(promisesList[index].timeout)
+    promisesList.splice(index, 1)
+  }
+
   const middleware = (_: Store) => (next: Dispatch<AnyAction>) => (action: AnyAction): Promise<void> | undefined => {
     // Loop promises to see if current action fullfills it
     for (let ii = 0; ii < promisesList.length; ii++) {
       promisesList[ii].actions = promisesList[ii].actions.filter((a) => a !== action.type)
 
-      // No more actions? Resolve
-      if (!promisesList[ii].actions.length) {
-        clearTimeout(promisesList[ii].errorTimeout)
-        promisesList[ii].deferred.resolve()
-        promisesList.splice(ii, 1)
+      // Reject if the error action occurred
+      if (promisesList[ii] && promisesList[ii].errorAction && action.type === promisesList[ii].errorAction) {
+        promisesList[ii].deferred.reject(`Redux-wait-for-ssr: rejected because ${action.type} occurred`)
+        removePromiseFromList(ii)
       }
+
+      // No more actions? Resolve
+      if (promisesList[ii] && !promisesList[ii].actions.length) {
+        promisesList[ii].deferred.resolve()
+        removePromiseFromList(ii)
+      }
+
     }
 
     next(action)
@@ -61,14 +82,16 @@ export default () => {
     // Create waitFor promise
     if (action.type === WAIT_FOR_ACTIONS) {
       const deferred = new Deferred()
+
+      const timeoutFn = setTimeout(() => {
+        deferred.reject(`Redux-wait-for-ssr: ${action.actions} did not resolve within timeout of ${action.timeout}ms`)
+      }, action.timeout)
+
       const waitingFor = {
         deferred,
         actions: action.actions,
-        errorTimeout: setTimeout(() => {
-          const reason = `Redux-wait-for-ssr: ${action.actions} did not resolve within timeout of ${action.timeout}ms`
-          if (typeof console !== 'undefined') { console.warn(reason) }
-          deferred.reject(reason)
-        }, action.timeout)
+        timeout: timeoutFn,
+        errorAction: action.errorAction
       }
 
       promisesList.push(waitingFor)
