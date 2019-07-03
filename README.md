@@ -138,4 +138,34 @@ class IndexPage extends React.PureComponent {
 }
 ```
 
-Since `getInitialProps` is re-used for soft url changes as well, the above is sufficient to implement data fetching for the client and server.
+Since `getInitialProps` is re-used for soft url changes as well, the above is sufficient to implement data fetching for both the client and server. The `selectors.isContentLoaded` Redux selector is something you need to implement yourself, it could be as simple as:
+
+```js
+export const isContentLoaded(state: StoreState): boolean => {
+   return state.content.isLoaded;
+}
+```
+
+And in the reducer you would set `state.content.isLoaded` to true when the `actions.FETCH_CONTENT_RESOLVED` event has occurred:
+
+```js
+export function reducers(state: StoreState, action: Actions): StoreState {
+    switch (action.type) {
+        case constants.FETCH_CONTENT_RESOLVED: {
+            state = {
+                ...state,
+                content: {
+                    data: action.response,
+                    isLoaded: true
+                }
+            }
+            return state
+        }
+    }
+}
+```
+
+
+This way you can keep track of requests that have been resolved in the state.
+
+Note the above example is pure illustrative, your mileage may vary.
